@@ -1,32 +1,69 @@
-* {
-  box-sizing: border-box;
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+
+  --color-brand-red-50: #fff2f1;
+  --color-brand-red-100: #ffd9d7;
+  --color-brand-red-500: #e63934;
+  --color-brand-red-600: #c92f2b;
+
+  --color-brand-navy-50: #eef4fa;
+  --color-brand-navy-100: #dbe7f2;
+  --color-brand-navy-200: #c1d2e4;
+  --color-brand-navy-500: #587493;
+  --color-brand-navy-700: #245577;
+  --color-brand-navy-900: #123858;
+  --color-brand-navy-950: #00466e;
+
+  --color-cloud-50: #f7fafc;
+  --color-cloud-100: #edf4f8;
+  --color-cloud-200: #dde8ee;
+  --color-sand-100: #f9f4ef;
+
+  --radius-card: 1.5rem;
+  --radius-field: 1rem;
+  --radius-pill: 999px;
+
+  --shadow-panel: 0 30px 70px rgba(0, 40, 72, 0.12);
+  --shadow-soft: 0 14px 32px rgba(0, 40, 72, 0.08);
+  --shadow-action: 0 16px 28px rgba(230, 57, 52, 0.2);
 }
 
 :root {
-  font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
-  color: #14213d;
+  color: #123858;
   background: #fff;
-  line-height: 1.5;
-  font-weight: 400;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-html,
-body,
-#root {
-  min-height: 100%;
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
-body {
-  margin: 0;
-}
+@layer base {
+  html,
+  body,
+  #root {
+    min-height: 100%;
+  }
 
-button,
-input,
-select,
-textarea {
-  font: inherit;
+  body {
+    @apply m-0 bg-transparent font-sans text-brand-navy-950;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+  }
+
+  ::selection {
+    @apply bg-brand-red-100 text-brand-navy-950;
+  }
 }
