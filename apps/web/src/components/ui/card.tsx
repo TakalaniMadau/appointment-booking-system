@@ -2,10 +2,13 @@ import type { HTMLAttributes } from "react";
 
 import { cn } from "../../lib/utils";
 
-export const Card = ({ className, ...props }: HTMLAttributes<HTMLDivElement>) => (
+export const Card = ({
+  className,
+  ...props
+}: HTMLAttributes<HTMLDivElement>) => (
   <section
     className={cn(
-      "rounded-card border border-brand-navy-100/80 bg-white/90 shadow-panel backdrop-blur-sm",
+      "rounded-card border border-slate-200 bg-white shadow-panel",
       className,
     )}
     {...props}
@@ -25,7 +28,7 @@ export const CardTitle = ({
 }: HTMLAttributes<HTMLHeadingElement>) => (
   <h2
     className={cn(
-      "text-2xl font-semibold tracking-tight text-brand-navy-950 sm:text-3xl",
+      "text-[1.5rem] font-semibold tracking-tight text-slate-900 sm:text-[1.75rem]",
       className,
     )}
     {...props}
@@ -37,7 +40,7 @@ export const CardDescription = ({
   ...props
 }: HTMLAttributes<HTMLParagraphElement>) => (
   <p
-    className={cn("text-sm leading-6 text-brand-navy-700 sm:text-base", className)}
+    className={cn("text-sm leading-6 text-slate-600 sm:text-base", className)}
     {...props}
   />
 );

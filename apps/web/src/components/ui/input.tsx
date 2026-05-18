@@ -10,10 +10,10 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
   ({ className, invalid = false, ...props }, ref) => (
     <input
       className={cn(
-        "flex h-12 w-full rounded-field border bg-white/90 px-4 text-sm text-brand-navy-950 shadow-soft outline-none transition-all duration-200 placeholder:text-brand-navy-500/80 focus-visible:ring-4 disabled:cursor-not-allowed disabled:opacity-60",
+        "flex h-12 w-full rounded-field border bg-white px-4 text-sm text-slate-900 shadow-soft outline-none transition-all duration-200 placeholder:text-slate-400 focus-visible:ring-4 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:opacity-70",
         invalid
-          ? "border-brand-red-500 focus-visible:ring-brand-red-100"
-          : "border-brand-navy-200 focus-visible:border-brand-red-500 focus-visible:ring-brand-red-100",
+          ? "border-danger-500 focus-visible:ring-danger-100"
+          : "border-slate-200 focus-visible:border-brand-blue-500 focus-visible:ring-brand-blue-100",
         className,
       )}
       data-invalid={invalid ? "true" : undefined}
