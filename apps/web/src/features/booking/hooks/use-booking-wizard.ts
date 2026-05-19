@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import type { CreateBookingRequest } from "@appointment/shared";
-import { parseISO, startOfMonth } from "date-fns";
+import { isAfter, parseISO, startOfMonth } from "date-fns";
 import { useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 
@@ -15,9 +15,10 @@ import type {
   BookingDetailsValues,
   BranchLocation,
   ConfirmedBooking,
+  TimeSlotOption,
 } from "../types";
 import {
-  buildTimeSlots,
+  getDaySlots,
   getMonthKey,
   isDateInAvailabilityMonth,
 } from "../utils/availability";
@@ -68,10 +69,6 @@ export const useBookingWizard = ({ branches }: UseBookingWizardProps) => {
 
   const selectedBranch =
     branches.find((branch) => branch.id === selectedBranchId) ?? null;
-  const currentMonth = startOfMonth(new Date());
-  const initialVisibleMonth = selectedBranch
-    ? getDefaultVisibleMonth(selectedBranch)
-    : currentMonth;
   const visibleMonthKey = getMonthKey(visibleMonth);
   const availabilityQuery = useQuery({
     enabled: Boolean(selectedBranch),
@@ -84,11 +81,11 @@ export const useBookingWizard = ({ branches }: UseBookingWizardProps) => {
   const pickerDate = draftDate || committedDate;
   const pickerTimeSlots =
     pickerDate && isDateInAvailabilityMonth(availability, pickerDate)
-      ? buildTimeSlots(availability, pickerDate)
+      ? getDaySlots(availability, pickerDate)
       : [];
-  const draftSlot =
-    pickerTimeSlots.find((slot) => slot.id === draftSlotId) ?? null;
-  const canApplySchedule = Boolean(draftDate && draftSlot);
+  const isSelectableSlot = (slot: TimeSlotOption | null) =>
+    Boolean(slot?.isAvailable) &&
+    Boolean(slot && isAfter(parseISO(slot.startsAt), new Date()));
   const createBookingMutation = useMutation({
     mutationFn: createBooking,
   });
@@ -119,6 +116,10 @@ export const useBookingWizard = ({ branches }: UseBookingWizardProps) => {
     setDateTimeError(null);
     setDraftDate(dateKey);
     setDraftSlotId("");
+    setSelectedDate(dateKey);
+    setSelectedSlotId("");
+    setSelectedTimeLabel("");
+
     if (!dateKey) {
       return;
     }
@@ -129,27 +130,16 @@ export const useBookingWizard = ({ branches }: UseBookingWizardProps) => {
   const handleDraftTimeChange = (value: string) => {
     setDateTimeError(null);
     setDraftSlotId(value);
-  };
 
-  const handleApplySchedule = () => {
-    if (!draftDate || !draftSlot) {
+    const slot = pickerTimeSlots.find((candidate) => candidate.id === value) ?? null;
+
+    if (!draftDate || !slot || !isSelectableSlot(slot)) {
       return;
     }
 
-    setDateTimeError(null);
     setSelectedDate(draftDate);
-    setSelectedSlotId(draftSlot.id);
-    setSelectedTimeLabel(draftSlot.label);
-  };
-
-  const handleCancelSchedule = () => {
-    setDraftDate(committedDate);
-    setDraftSlotId(selectedSlotId);
-    setVisibleMonth(
-      committedDate
-        ? startOfMonth(parseISO(committedDate))
-        : initialVisibleMonth,
-    );
+    setSelectedSlotId(slot.id);
+    setSelectedTimeLabel(slot.label);
   };
 
   const handleContinueToSchedule = () => {
@@ -270,7 +260,6 @@ export const useBookingWizard = ({ branches }: UseBookingWizardProps) => {
 
   return {
     availabilityQuery,
-    canApplySchedule,
     committedDate,
     committedTime,
     confirmedBooking,
@@ -278,12 +267,10 @@ export const useBookingWizard = ({ branches }: UseBookingWizardProps) => {
     dateTimeError,
     detailsForm,
     draftSlotId,
-    handleApplySchedule,
     handleBackToBranchSelection,
     handleBackToDateTime,
     handleBookAnotherAppointment,
     handleBranchSelection,
-    handleCancelSchedule,
     handleConfirmAppointment,
     handleContinueToDetails,
     handleContinueToSchedule,

@@ -56,13 +56,13 @@ const branches = [
 ] as const;
 
 const businessHours = [
-  { closesAt: "16:30", dayOfWeek: 1, opensAt: "08:30" },
-  { closesAt: "16:30", dayOfWeek: 2, opensAt: "08:30" },
-  { closesAt: "16:30", dayOfWeek: 3, opensAt: "08:30" },
-  { closesAt: "16:30", dayOfWeek: 4, opensAt: "08:30" },
-  { closesAt: "16:30", dayOfWeek: 5, opensAt: "08:30" },
-  { closesAt: "13:00", dayOfWeek: 6, opensAt: "09:00" },
-  { closesAt: "00:00", dayOfWeek: 0, isClosed: true, opensAt: "00:00" },
+  { closesAt: "16:30", dayOfWeek: 1, isClosed: false, opensAt: "08:00" },
+  { closesAt: "16:30", dayOfWeek: 2, isClosed: false, opensAt: "08:00" },
+  { closesAt: "16:30", dayOfWeek: 3, isClosed: false, opensAt: "08:00" },
+  { closesAt: "16:30", dayOfWeek: 4, isClosed: false, opensAt: "08:00" },
+  { closesAt: "16:30", dayOfWeek: 5, isClosed: false, opensAt: "08:00" },
+  { closesAt: "13:30", dayOfWeek: 6, isClosed: false, opensAt: "09:00" },
+  { closesAt: "13:30", dayOfWeek: 0, isClosed: false, opensAt: "09:00" },
 ] as const;
 
 const SLOT_DURATION_MINUTES = 30;
@@ -98,7 +98,7 @@ const buildBranchClosures = (startDate: Date) => [
     slug: "sandton-branch",
     startsAt: southAfricaDateTimeToUtc(
       dateToKey(addDaysUtc(startDate, 10)),
-      "08:30",
+      "08:00",
     ),
   },
 ];
@@ -130,7 +130,7 @@ async function main() {
           create: businessHours.map((window) => ({
             closesAt: window.closesAt,
             dayOfWeek: window.dayOfWeek,
-            isClosed: "isClosed" in window ? window.isClosed : false,
+            isClosed: window.isClosed,
             opensAt: window.opensAt,
             slotDurationMinutes: SLOT_DURATION_MINUTES,
           })),
@@ -183,7 +183,7 @@ async function main() {
       const dayOfWeek = southAfricaDateTimeToUtc(dateKey, "08:30").getUTCDay();
       const window = businessHours.find((entry) => entry.dayOfWeek === dayOfWeek);
 
-      if (!window || ("isClosed" in window && window.isClosed)) {
+      if (!window || window.isClosed) {
         continue;
       }
 

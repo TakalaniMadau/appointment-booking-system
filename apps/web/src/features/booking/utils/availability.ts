@@ -1,8 +1,13 @@
-import {
-  format,
-} from "date-fns";
+import { format, isAfter, parseISO } from "date-fns";
 
 import type { AvailabilityMonth, TimeSlotOption } from "../types";
+
+export type DisplayTimeSlot = {
+  id: string;
+  isDisabled: boolean;
+  isSelected: boolean;
+  label: string;
+};
 
 export const getAvailabilityMap = (availability: AvailabilityMonth | null) =>
   new Map(
@@ -12,13 +17,29 @@ export const getAvailabilityMap = (availability: AvailabilityMonth | null) =>
     ]),
   );
 
+export const getDaySlots = (
+  availability: AvailabilityMonth | null,
+  dateKey: string,
+): TimeSlotOption[] => getAvailabilityMap(availability).get(dateKey)?.slots ?? [];
+
 export const buildTimeSlots = (
   availability: AvailabilityMonth | null,
   dateKey: string,
-): TimeSlotOption[] =>
-  getAvailabilityMap(availability)
-    .get(dateKey)
-    ?.slots.filter((slot) => slot.isAvailable) ?? [];
+): TimeSlotOption[] => getDaySlots(availability, dateKey).filter((slot) => slot.isAvailable);
+
+export const buildDisplayTimeSlots = (
+  slots: TimeSlotOption[],
+  selectedSlotId: string,
+  now: Date = new Date(),
+): DisplayTimeSlot[] =>
+  slots
+    .filter((slot) => isAfter(parseISO(slot.startsAt), now))
+    .map((slot) => ({
+      id: slot.id,
+      isDisabled: !slot.isAvailable,
+      isSelected: slot.id === selectedSlotId,
+      label: slot.label,
+    }));
 
 export const getMonthKey = (month: Date) => format(month, "yyyy-MM");
 

@@ -25,6 +25,7 @@ type BranchSelectionStepProps = {
   isContinueDisabled: boolean;
   isGeocodeFetching: boolean;
   isLocating: boolean;
+  isSearchingLocation: boolean;
   locationError: string | null;
   mapFrameRef: RefObject<HTMLDivElement | null>;
   resultsLabel: string;
@@ -45,6 +46,7 @@ export const BranchSelectionStep = ({
   isContinueDisabled,
   isGeocodeFetching,
   isLocating,
+  isSearchingLocation,
   locationError,
   mapFrameRef,
   resultsLabel,
@@ -73,20 +75,20 @@ export const BranchSelectionStep = ({
               <Input
                 className="pl-11"
                 onChange={(event) => onSearchValueChange(event.target.value)}
-                placeholder="Search by city or zip code"
+                placeholder="Search by branch, city, or postal code"
                 value={searchValue}
               />
             </div>
             <div className="grow-0">
               <Button
-                className="self-start"
+                className="self-start font-normal"
                 disabled={isLocating}
                 onClick={onUseCurrentLocation}
                 size="sm"
                 variant="ghost"
               >
+                {isLocating ? "Locating..." : "Use my location"}
                 <TargetIcon className="h-5 w-5" />
-                {isLocating ? "Locating..." : "Use My Location"}
               </Button>
             </div>
           </div>
@@ -123,6 +125,16 @@ export const BranchSelectionStep = ({
           ) : showBranchesError ? (
             <div className="rounded-field border border-danger-500/20 bg-danger-100/40 px-4 py-3 text-sm text-danger-500">
               We couldn't load branches right now.
+            </div>
+          ) : branches.length === 0 && isSearchingLocation ? (
+            <div className="rounded-field border border-slate-200 bg-slate-50 px-4 py-5 text-sm text-slate-600">
+              Finding the closest matching location...
+            </div>
+          ) : branches.length === 0 ? (
+            <div className="rounded-field border border-slate-200 bg-slate-50 px-4 py-5 text-sm text-slate-600">
+              {searchValue.trim()
+                ? `No branches matched "${searchValue.trim()}". Try another branch, city, or postal code.`
+                : "No branches are available right now."}
             </div>
           ) : (
             <div className="grid max-h-[34rem] gap-4 overflow-auto pr-1">

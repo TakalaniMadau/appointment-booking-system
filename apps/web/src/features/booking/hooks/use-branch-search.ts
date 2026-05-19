@@ -1,8 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
-import { startTransition, useDeferredValue, useState } from "react";
+import { startTransition, useState } from "react";
 
 import { geocodeSearchLocation, getBranches } from "../../../api/branches";
+import {
+  deriveVisibleBranches,
+  shouldGeocodeBranchSearch,
+} from "../utils/branch-search";
 import type { SearchCoordinates } from "../types";
+import { useDebouncedValue } from "./use-debounced-value";
 
 const defaultCoordinates: SearchCoordinates = {
   label: "Johannesburg, Gauteng",
@@ -11,23 +16,46 @@ const defaultCoordinates: SearchCoordinates = {
   source: "default",
 };
 
+const LOCATION_SEARCH_DEBOUNCE_MS = 350;
+
 export const useBranchSearch = () => {
   const [manualCoordinates, setManualCoordinates] =
     useState<SearchCoordinates | null>(null);
   const [deviceError, setDeviceError] = useState<string | null>(null);
   const [isLocating, setIsLocating] = useState(false);
   const [searchValue, setSearchValue] = useState("");
-  const deferredSearchValue = useDeferredValue(searchValue.trim());
+  const trimmedSearchValue = searchValue.trim();
+  const debouncedSearchValue = useDebouncedValue(
+    trimmedSearchValue,
+    LOCATION_SEARCH_DEBOUNCE_MS,
+  );
 
-  const geocodeQuery = useQuery({
-    enabled: deferredSearchValue.length >= 2,
-    queryFn: () => geocodeSearchLocation(deferredSearchValue),
-    queryKey: ["branch-search-location", deferredSearchValue],
+  const baseCoordinates = manualCoordinates ?? defaultCoordinates;
+  const baseBranchesQuery = useQuery({
+    queryFn: () => getBranches(baseCoordinates),
+    queryKey: [
+      "branches",
+      baseCoordinates.latitude,
+      baseCoordinates.longitude,
+    ],
     staleTime: 300_000,
   });
-
+  const visibleBranchesResult = deriveVisibleBranches({
+    branches: baseBranchesQuery.data ?? [],
+    query: trimmedSearchValue,
+  });
+  const shouldGeocodeSearch = shouldGeocodeBranchSearch(
+    debouncedSearchValue,
+    visibleBranchesResult.hasDirectMatches,
+  );
+  const geocodeQuery = useQuery({
+    enabled: shouldGeocodeSearch,
+    queryFn: () => geocodeSearchLocation(debouncedSearchValue),
+    queryKey: ["branch-search-location", debouncedSearchValue],
+    staleTime: 300_000,
+  });
   const searchCoordinates =
-    deferredSearchValue.length >= 2 && geocodeQuery.data?.[0]
+    shouldGeocodeSearch && geocodeQuery.data?.[0]
       ? ({
           label: geocodeQuery.data[0].label,
           latitude: geocodeQuery.data[0].latitude,
@@ -35,14 +63,7 @@ export const useBranchSearch = () => {
           source: "search",
         } satisfies SearchCoordinates)
       : null;
-  const activeCoordinates = manualCoordinates ?? searchCoordinates ?? defaultCoordinates;
-  const locationError =
-    deferredSearchValue.length >= 2 &&
-    geocodeQuery.isSuccess &&
-    !searchCoordinates
-      ? `No South African locations matched "${deferredSearchValue}".`
-      : deviceError;
-
+  const activeCoordinates = searchCoordinates ?? baseCoordinates;
   const branchesQuery = useQuery({
     queryFn: () => getBranches(activeCoordinates),
     queryKey: [
@@ -52,6 +73,44 @@ export const useBranchSearch = () => {
     ],
     staleTime: 300_000,
   });
+  const visibleBranches = !trimmedSearchValue
+    ? branchesQuery.data ?? []
+    : visibleBranchesResult.hasDirectMatches
+      ? visibleBranchesResult.visibleBranches
+      : searchCoordinates
+        ? branchesQuery.data ?? []
+        : [];
+  const isWaitingForLocationMatch =
+    shouldGeocodeSearch &&
+    trimmedSearchValue !== debouncedSearchValue &&
+    !searchCoordinates;
+  const isSearchingLocation =
+    Boolean(trimmedSearchValue) &&
+    !visibleBranchesResult.hasDirectMatches &&
+    (isWaitingForLocationMatch ||
+      geocodeQuery.isFetching ||
+      (Boolean(searchCoordinates) && branchesQuery.isFetching));
+  const locationError =
+    shouldGeocodeSearch &&
+    geocodeQuery.isSuccess &&
+    !searchCoordinates &&
+    !isWaitingForLocationMatch
+      ? `No branches or South African locations matched "${debouncedSearchValue}".`
+      : deviceError;
+
+  const resultsLabel = trimmedSearchValue
+    ? visibleBranchesResult.hasDirectMatches
+      ? `Found ${visibleBranches.length} matching ${
+          visibleBranches.length === 1 ? "branch" : "branches"
+        } for "${trimmedSearchValue}".`
+      : isWaitingForLocationMatch || geocodeQuery.isFetching
+        ? "Finding the closest matching location..."
+        : searchCoordinates
+          ? `Showing branches near ${searchCoordinates.label}.`
+          : shouldGeocodeSearch && geocodeQuery.isSuccess
+            ? `No branches or South African locations matched "${debouncedSearchValue}".`
+            : `No branches matched "${trimmedSearchValue}".`
+    : `Showing branches near ${baseCoordinates.label}.`;
 
   const updateSearchValue = (value: string) => {
     setDeviceError(null);
@@ -101,9 +160,12 @@ export const useBranchSearch = () => {
     branchesQuery,
     geocodeQuery,
     isLocating,
+    isSearchingLocation,
     locationError,
+    resultsLabel,
     searchValue,
     updateSearchValue,
     useCurrentLocation,
+    visibleBranches,
   };
 };

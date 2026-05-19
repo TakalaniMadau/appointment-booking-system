@@ -19,17 +19,19 @@ const EMPTY_BRANCHES: BranchLocation[] = [];
 
 export const BookingWizard = () => {
   const {
-    activeCoordinates,
     branchesQuery,
     geocodeQuery,
     isLocating,
+    isSearchingLocation,
     locationError,
+    resultsLabel,
     searchValue,
     updateSearchValue,
     useCurrentLocation,
+    visibleBranches,
   } = useBranchSearch();
   const mapFrameRef = useRef<HTMLDivElement | null>(null);
-  const branches = branchesQuery.data ?? EMPTY_BRANCHES;
+  const branches = visibleBranches ?? EMPTY_BRANCHES;
   const wizard = useBookingWizard({ branches });
 
   const toggleMapFullscreen = async () => {
@@ -57,9 +59,10 @@ export const BookingWizard = () => {
           isContinueDisabled={!wizard.selectedBranch}
           isGeocodeFetching={geocodeQuery.isFetching}
           isLocating={isLocating}
+          isSearchingLocation={isSearchingLocation}
           locationError={locationError}
           mapFrameRef={mapFrameRef}
-          resultsLabel={`Showing branches near ${activeCoordinates.label}.`}
+          resultsLabel={resultsLabel}
           searchValue={searchValue}
           selectedBranchId={wizard.selectedBranch?.id ?? null}
           showBranchesError={Boolean(branchesQuery.error)}
@@ -73,8 +76,6 @@ export const BookingWizard = () => {
 
       {wizard.currentStep === 1 && wizard.selectedBranch ? (
         <DateTimeStep
-          availability={wizard.availabilityQuery.data ?? null}
-          canApplySchedule={wizard.canApplySchedule}
           committedDate={wizard.committedDate}
           committedTime={wizard.committedTime}
           draftSlotId={wizard.draftSlotId}
@@ -85,9 +86,7 @@ export const BookingWizard = () => {
           pickerTimeSlots={wizard.pickerTimeSlots}
           selectedBranch={wizard.selectedBranch}
           showAvailabilityError={Boolean(wizard.availabilityQuery.error)}
-          onApply={wizard.handleApplySchedule}
           onBack={wizard.handleBackToBranchSelection}
-          onCancel={wizard.handleCancelSchedule}
           onContinue={wizard.handleContinueToDetails}
           onDateSelect={wizard.handleDateSelection}
           onDraftTimeChange={wizard.handleDraftTimeChange}
