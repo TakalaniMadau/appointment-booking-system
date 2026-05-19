@@ -1,18 +1,10 @@
 import type { ComponentType, SVGProps } from "react";
 
-import {
-  Card,
-  CardContent,
-} from "../../../components/ui/card";
+import { Card, CardContent } from "../../../components/ui/card";
 import { cn } from "../../../lib/utils";
 import type { BookingStepKey } from "../utils/booking-wizard-constants";
 import { stepDefinitions } from "../utils/booking-wizard-constants";
-import {
-  CalendarIcon,
-  CheckIcon,
-  LocationPinIcon,
-  UserIcon,
-} from "./icons";
+import { CalendarIcon, CheckIcon, LocationPinIcon, UserIcon } from "./icons";
 
 type BookingStepperProps = {
   currentStep: number;
@@ -49,7 +41,7 @@ export const BookingStepper = ({ currentStep }: BookingStepperProps) => (
               {index < stepDefinitions.length - 1 ? (
                 <span
                   className={cn(
-                    "absolute left-8 top-5 h-[3px] w-[calc(100%--20rem)] rounded-full",
+                    "absolute left-8 top-5 h-[3px] w-[calc(100%--3rem)] md:w-[calc(100%--18rem)] md:w-[calc(100%--9rem)] lg:w-[calc(100%--12rem)] xl:w-[calc(100%--19rem)] rounded-full",
                     index < currentStep ? "bg-brand-blue-600" : "bg-slate-200",
                   )}
                 />

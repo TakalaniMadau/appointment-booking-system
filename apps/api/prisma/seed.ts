@@ -1,7 +1,5 @@
 import { PrismaClient } from "@prisma/client";
 
-import "../src/config/load-env.js";
-
 const prisma = new PrismaClient();
 
 const branches = [

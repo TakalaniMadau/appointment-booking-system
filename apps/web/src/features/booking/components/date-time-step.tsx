@@ -9,10 +9,7 @@ import {
   CardTitle,
 } from "../../../components/ui/card";
 import { Input } from "../../../components/ui/input";
-import type {
-  BranchLocation,
-  TimeSlotOption,
-} from "../types";
+import type { BranchLocation, TimeSlotOption } from "../types";
 import { buildDisplayTimeSlots } from "../utils/availability";
 import { SelectionSummary } from "./selection-summary";
 import { ArrowLeftIcon, ArrowRightIcon } from "./icons";
@@ -172,7 +169,12 @@ export const DateTimeStep = ({
       </div>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <Button onClick={onBack} size="lg" variant="secondary">
+        <Button
+          onClick={onBack}
+          className="w-full md:w-xs"
+          size="lg"
+          variant="secondary"
+        >
           <ArrowLeftIcon className="h-4 w-4" />
           Back
         </Button>
@@ -184,6 +186,7 @@ export const DateTimeStep = ({
           ) : null}
           <Button
             disabled={!committedDate || !committedTime}
+            className="w-full md:w-xs"
             onClick={onContinue}
             size="lg"
           >

@@ -53,7 +53,7 @@ docker compose up --build -d
 2. Seed demo branches and slots:
 
 ```bash
-docker compose exec -T api node --import tsx apps/api/prisma/seed.ts
+docker compose exec -T api sh -lc 'cd /app/apps/api && ./node_modules/.bin/tsx prisma/seed.ts'
 ```
 
 3. Open the app:

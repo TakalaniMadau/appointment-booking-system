@@ -58,7 +58,9 @@ export const DetailsStep = ({
               placeholder="John Doe"
               {...detailsForm.register("fullName")}
             />
-            <FieldError message={detailsForm.formState.errors.fullName?.message} />
+            <FieldError
+              message={detailsForm.formState.errors.fullName?.message}
+            />
           </div>
 
           <div>
@@ -149,7 +151,12 @@ export const DetailsStep = ({
     </Card>
 
     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <Button onClick={onBack} size="lg" variant="secondary">
+      <Button
+        onClick={onBack}
+        className="w-full md:w-xs"
+        size="lg"
+        variant="secondary"
+      >
         <ArrowLeftIcon className="h-4 w-4" />
         Back
       </Button>

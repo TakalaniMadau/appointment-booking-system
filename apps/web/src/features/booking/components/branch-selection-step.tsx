@@ -79,7 +79,7 @@ export const BranchSelectionStep = ({
                 value={searchValue}
               />
             </div>
-            <div className="grow-0">
+            <div className="grow-0 flex items-center">
               <Button
                 className="self-start font-normal"
                 disabled={isLocating}
@@ -87,7 +87,7 @@ export const BranchSelectionStep = ({
                 size="sm"
                 variant="ghost"
               >
-                {isLocating ? "Locating..." : "Use my location"}
+                <span className="hidden md:flex">Use my current location</span>
                 <TargetIcon className="h-5 w-5" />
               </Button>
             </div>
@@ -177,7 +177,12 @@ export const BranchSelectionStep = ({
     </div>
 
     <div className="flex justify-end">
-      <Button disabled={isContinueDisabled} onClick={onContinue} size="lg">
+      <Button
+        disabled={isContinueDisabled}
+        className="w-full md:w-xs"
+        onClick={onContinue}
+        size="lg"
+      >
         Continue to Date &amp; Time
         <ArrowRightIcon className="h-4 w-4" />
       </Button>
