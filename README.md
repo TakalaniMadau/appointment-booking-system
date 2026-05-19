@@ -13,7 +13,7 @@ Full-stack appointment booking system built as a `pnpm` workspace with:
 - Branch discovery with map view and geocoded location search
 - Real appointment availability loaded from the API
 - Transactional booking flow that prevents double-booking
-- Simulated confirmation email via an outbox table
+- Confirmation step with appointment summary and follow-up actions
 - Shared request and response contracts between frontend and backend
 
 ## Workspace Layout

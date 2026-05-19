@@ -3,7 +3,6 @@ import type { BookingConfirmation, CreateBookingRequest } from "@appointment/sha
 
 import { AppError } from "../../lib/errors.js";
 import { formatDateKeyInTimeZone, formatTimeLabelInTimeZone } from "../../lib/datetime.js";
-import { markConfirmationEmailAsSent } from "./email-outbox.service.js";
 import { getBranchSummaryById } from "../branches/branch.service.js";
 
 const createConfirmationCode = () =>
@@ -155,25 +154,8 @@ export const createBooking = async (
       },
     });
 
-    await transaction.emailOutbox.create({
-      data: {
-        bookingId: createdBooking.id,
-        payloadJson: {
-          branchName: slot.branch.name,
-          fullName: input.fullName,
-          purposeOfVisit: input.purposeOfVisit,
-          slotId: slot.id,
-          slotStartsAt: slot.startsAt.toISOString(),
-        },
-        subject: `Appointment confirmed for ${slot.branch.name}`,
-        toEmail: input.email,
-      },
-    });
-
     return createdBooking;
   });
-
-  await markConfirmationEmailAsSent(prisma, booking.id);
 
   return buildConfirmationPayload(prisma, booking.id);
 };

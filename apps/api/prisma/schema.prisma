@@ -18,12 +18,6 @@ enum BookingStatus {
   CANCELLED
 }
 
-enum EmailDeliveryStatus {
-  PENDING
-  SENT
-  FAILED
-}
-
 model Branch {
   id             String               @id @default(cuid())
   slug           String               @unique
@@ -106,22 +100,6 @@ model Booking {
   slot             AppointmentSlot @relation(fields: [slotId], references: [id], onDelete: Restrict)
   branch           Branch          @relation(fields: [branchId], references: [id], onDelete: Restrict)
   customer         Customer        @relation(fields: [customerId], references: [id], onDelete: Restrict)
-  emailOutbox      EmailOutbox[]
   createdAt        DateTime        @default(now())
   updatedAt        DateTime        @updatedAt
-}
-
-model EmailOutbox {
-  id          String              @id @default(cuid())
-  bookingId   String
-  toEmail     String
-  subject     String
-  payloadJson Json
-  status      EmailDeliveryStatus @default(PENDING)
-  sentAt      DateTime?
-  booking     Booking             @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-  createdAt   DateTime            @default(now())
-  updatedAt   DateTime            @updatedAt
-
-  @@index([bookingId, status])
 }

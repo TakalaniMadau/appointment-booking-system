@@ -3,9 +3,7 @@ import { format, parseISO } from "date-fns";
 import { Button } from "../../../components/ui/button";
 import { Card, CardContent } from "../../../components/ui/card";
 import type { ConfirmedBooking } from "../types";
-import {
-  appointmentReminders,
-} from "../utils/booking-wizard-constants";
+import { appointmentReminders } from "../utils/booking-wizard-constants";
 import { getPurposeLabel } from "../utils/booking-confirmation";
 import { ConfirmationRow } from "./confirmation-row";
 import {
@@ -44,14 +42,14 @@ export const ConfirmationStep = ({
           Appointment Confirmed!
         </h2>
         <p className="mx-auto max-w-2xl text-base leading-7 text-slate-600">
-          Your appointment has been successfully scheduled. A confirmation
-          summary is ready below for your records.
+          Your appointment has been successfully scheduled. A confirmation email
+          has been sent.
         </p>
       </div>
 
       <div className="rounded-card border border-brand-blue-200 bg-brand-blue-50 p-6 text-left">
         <h3 className="text-center text-2xl font-semibold text-slate-900">
-          Appointment Details
+          Appointment Details Summary
         </h3>
 
         <div className="mt-6 divide-y divide-brand-blue-200">
@@ -78,7 +76,8 @@ export const ConfirmationStep = ({
             label="Purpose"
             primary={getPurposeLabel(booking.details.purposeOfVisit)}
             secondary={
-              booking.details.additionalNotes || "No additional notes were added."
+              booking.details.additionalNotes ||
+              "No additional notes were added."
             }
           />
         </div>

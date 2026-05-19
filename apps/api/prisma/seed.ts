@@ -104,7 +104,6 @@ const buildBranchClosures = (startDate: Date) => [
 ];
 
 async function main() {
-  await prisma.emailOutbox.deleteMany();
   await prisma.booking.deleteMany();
   await prisma.appointmentSlot.deleteMany();
   await prisma.branchClosure.deleteMany();
