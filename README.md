@@ -140,43 +140,6 @@ pnpm dev:api
 pnpm dev:web
 ```
 
-## Helpful Notes
-
-- You do not need `mise` to run this project.
-- Docker is the quickest way to get started after a fresh clone.
-- The UI will look empty until the database has been seeded.
-- If you switch Node versions after installing dependencies, reinstall them so native packages like Vite and Tailwind line up with your active Node version.
-
-## Scripts
-
-- `pnpm dev`: run API and web in parallel
-- `pnpm build`: build all workspace packages
-- `pnpm typecheck`: run TypeScript checks across the workspace
-- `pnpm test`: run shared, API, and web tests
-- `pnpm db:generate`: generate Prisma client
-- `pnpm db:migrate`: create a local development migration
-- `pnpm db:seed`: seed branches, business hours, closures, and slots
-- `pnpm docker:up`: build and run the Compose stack
-- `pnpm docker:down`: stop the Compose stack
-
-## Database Model
-
-Core tables:
-
-- `Branch`
-- `BranchBusinessHour`
-- `BranchClosure`
-- `AppointmentSlot`
-- `Customer`
-- `Booking`
-- `EmailOutbox`
-
-Important constraints:
-
-- Unique slot per branch start time: `AppointmentSlot(branchId, startsAt)`
-- Unique booking per slot: `Booking(slotId)`
-- Customer email uniqueness for repeat booking updates
-
 ## API Endpoints
 
 - `GET /api/health`
@@ -205,15 +168,3 @@ Run the workspace test suite:
 ```bash
 pnpm test
 ```
-
-Current coverage includes:
-
-- Shared contract validation
-- API date-window utility coverage
-- Frontend availability helper coverage
-
-## Notes
-
-- The frontend keeps the map-driven branch selection UX and now uses internal API data instead of the prototype-only external branch feed.
-- Confirmation emails are simulated by writing to `EmailOutbox` and marking the message as sent after booking creation.
-- All seeded branches currently use `Africa/Johannesburg`, which keeps time handling consistent for the South African branch set used in this project.
