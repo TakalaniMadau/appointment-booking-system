@@ -35,7 +35,6 @@ test("shared booking contracts require mapped branch data to include routing det
       phone: "010 123 4501",
       postalCode: "2196",
       province: "Gauteng",
-      slug: "sandton-branch",
       timezone: "Africa/Johannesburg",
     }),
   );

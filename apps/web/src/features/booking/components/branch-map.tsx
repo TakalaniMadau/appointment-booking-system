@@ -6,7 +6,7 @@ import type { BranchLocation } from "../types";
 type BranchMapProps = {
   branches: BranchLocation[];
   onSelectBranch: (branch: BranchLocation) => void;
-  selectedBranchSlug: string | null;
+  selectedBranchId: string | null;
 };
 
 const buildMarkerIcon = (isSelected: boolean) =>
@@ -25,7 +25,7 @@ const buildMarkerIcon = (isSelected: boolean) =>
 export const BranchMap = ({
   branches,
   onSelectBranch,
-  selectedBranchSlug,
+  selectedBranchId,
 }: BranchMapProps) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<L.Map | null>(null);
@@ -60,8 +60,8 @@ export const BranchMap = ({
   }, []);
 
   const selectedBranch = useMemo(
-    () => branches.find((branch) => branch.id === selectedBranchSlug) ?? null,
-    [branches, selectedBranchSlug],
+    () => branches.find((branch) => branch.id === selectedBranchId) ?? null,
+    [branches, selectedBranchId],
   );
 
   useEffect(() => {
@@ -74,7 +74,7 @@ export const BranchMap = ({
 
     const markers = branches.map((branch) => {
       const marker = L.marker([branch.latitude, branch.longitude], {
-        icon: buildMarkerIcon(branch.id === selectedBranchSlug),
+        icon: buildMarkerIcon(branch.id === selectedBranchId),
       });
 
       marker.on("click", () => {
@@ -113,7 +113,7 @@ export const BranchMap = ({
       const bounds = L.featureGroup(markers).getBounds().pad(0.18);
       mapRef.current.fitBounds(bounds);
     }
-  }, [branches, onSelectBranch, selectedBranch, selectedBranchSlug]);
+  }, [branches, onSelectBranch, selectedBranch, selectedBranchId]);
 
   return <div className="h-full min-h-[420px] w-full" ref={containerRef} />;
 };

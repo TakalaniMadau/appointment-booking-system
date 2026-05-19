@@ -61,7 +61,7 @@ export const BookingWizard = () => {
           mapFrameRef={mapFrameRef}
           resultsLabel={`Showing branches near ${activeCoordinates.label}.`}
           searchValue={searchValue}
-          selectedBranchSlug={wizard.selectedBranch?.id ?? null}
+          selectedBranchId={wizard.selectedBranch?.id ?? null}
           showBranchesError={Boolean(branchesQuery.error)}
           onBranchSelect={wizard.handleBranchSelection}
           onContinue={wizard.handleContinueToSchedule}

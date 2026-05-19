@@ -277,7 +277,6 @@ export const useBookingWizard = ({ branches }: UseBookingWizardProps) => {
     currentStep,
     dateTimeError,
     detailsForm,
-    draftDate,
     draftSlotId,
     handleApplySchedule,
     handleBackToBranchSelection,
@@ -297,9 +296,6 @@ export const useBookingWizard = ({ branches }: UseBookingWizardProps) => {
     pickerDate,
     pickerTimeSlots,
     selectedBranch,
-    selectedBranchId,
-    selectedDate,
-    selectedTime: committedTime,
     submissionError,
   };
 };

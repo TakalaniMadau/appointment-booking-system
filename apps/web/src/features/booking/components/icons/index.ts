@@ -4,8 +4,6 @@ export { CalendarIcon } from "./calendar-icon";
 export { CalendarPlusIcon } from "./calendar-plus-icon";
 export { CheckCircleIcon } from "./check-circle-icon";
 export { CheckIcon } from "./check-icon";
-export { ChevronLeftIcon } from "./chevron-left-icon";
-export { ChevronRightIcon } from "./chevron-right-icon";
 export { CircleIcon } from "./circle-icon";
 export { ClockIcon } from "./clock-icon";
 export { DistanceIcon } from "./distance-icon";

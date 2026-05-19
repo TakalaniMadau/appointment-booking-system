@@ -10,5 +10,5 @@
     "esModuleInterop": true,
     "noEmit": true
   },
-  "include": ["src", "prisma", "vitest.config.ts"]
+  "include": ["src", "prisma"]
 }

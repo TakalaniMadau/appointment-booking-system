@@ -29,7 +29,7 @@ type BranchSelectionStepProps = {
   mapFrameRef: RefObject<HTMLDivElement | null>;
   resultsLabel: string;
   searchValue: string;
-  selectedBranchSlug: string | null;
+  selectedBranchId: string | null;
   onBranchSelect: (branch: BranchLocation) => void;
   onContinue: () => void;
   onSearchValueChange: (value: string) => void;
@@ -49,7 +49,7 @@ export const BranchSelectionStep = ({
   mapFrameRef,
   resultsLabel,
   searchValue,
-  selectedBranchSlug,
+  selectedBranchId,
   onBranchSelect,
   onContinue,
   onSearchValueChange,
@@ -129,7 +129,7 @@ export const BranchSelectionStep = ({
               {branches.map((branch) => (
                 <BranchCard
                   branch={branch}
-                  isSelected={branch.id === selectedBranchSlug}
+                  isSelected={branch.id === selectedBranchId}
                   key={branch.id}
                   onSelect={() => onBranchSelect(branch)}
                 />
@@ -157,7 +157,7 @@ export const BranchSelectionStep = ({
             <BranchMap
               branches={branches}
               onSelectBranch={onBranchSelect}
-              selectedBranchSlug={selectedBranchSlug}
+              selectedBranchId={selectedBranchId}
             />
           </div>
         </CardContent>

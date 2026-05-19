@@ -1,7 +1,5 @@
 import { z } from "zod";
 
-export const branchTimezone = "Africa/Johannesburg";
-
 export const purposeOfVisitOptions = [
   { label: "Account support", value: "account-support" },
   { label: "Card collection", value: "card-collection" },
@@ -42,7 +40,6 @@ export const branchSummarySchema = z.object({
   phone: z.string(),
   postalCode: z.string(),
   province: z.string(),
-  slug: z.string(),
   timezone: z.string(),
 });
 
@@ -84,11 +81,6 @@ export const bookingConfirmationSchema = z.object({
   slotId: z.string(),
 });
 
-export const apiErrorSchema = z.object({
-  code: z.string(),
-  message: z.string(),
-});
-
 export type BookingDetails = z.infer<typeof bookingDetailsSchema>;
 export type BranchSummary = z.infer<typeof branchSummarySchema>;
 export type BranchesResponse = z.infer<typeof branchesResponseSchema>;
@@ -97,4 +89,3 @@ export type AvailabilityDay = z.infer<typeof availabilityDaySchema>;
 export type BranchAvailability = z.infer<typeof branchAvailabilitySchema>;
 export type CreateBookingRequest = z.infer<typeof createBookingRequestSchema>;
 export type BookingConfirmation = z.infer<typeof bookingConfirmationSchema>;
-export type ApiErrorPayload = z.infer<typeof apiErrorSchema>;

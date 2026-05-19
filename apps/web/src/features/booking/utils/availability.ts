@@ -12,11 +12,6 @@ export const getAvailabilityMap = (availability: AvailabilityMonth | null) =>
     ]),
   );
 
-export const getFirstAvailableDate = (availability: AvailabilityMonth | null) =>
-  availability?.days.find((day) =>
-    day.slots.some((slot) => slot.isAvailable),
-  )?.date ?? "";
-
 export const buildTimeSlots = (
   availability: AvailabilityMonth | null,
   dateKey: string,

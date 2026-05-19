@@ -72,7 +72,6 @@ const mapBranchSummary = (
     phone: string;
     postalCode: string;
     province: string;
-    slug: string;
     streetAddress: string;
     timezone: string;
     id: string;
@@ -107,7 +106,6 @@ const mapBranchSummary = (
   phone: branch.phone,
   postalCode: branch.postalCode,
   province: branch.province,
-  slug: branch.slug,
   timezone: branch.timezone,
 });
 

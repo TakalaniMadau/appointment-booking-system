@@ -46,12 +46,3 @@ export const formatMonthWindow = (month: string) => {
 
   return { end, start };
 };
-
-export const formatDateLong = (date: Date, timeZone: string) =>
-  new Intl.DateTimeFormat(southAfricaLocale, {
-    day: "numeric",
-    month: "long",
-    timeZone,
-    weekday: "long",
-    year: "numeric",
-  }).format(date);
