@@ -6,16 +6,33 @@
     "node": ">=24 <25"
   },
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Full-stack appointment booking system monorepo",
   "scripts": {
+    "build": "pnpm -r build",
+    "dev": "pnpm --filter @appointment/shared build && pnpm --parallel --stream --filter @appointment/api --filter @appointment/web dev",
+    "dev:api": "pnpm --filter @appointment/shared build && pnpm --filter @appointment/api dev",
+    "dev:web": "pnpm --filter @appointment/shared build && pnpm --filter @appointment/web dev",
+    "db:deploy": "pnpm --filter @appointment/api db:deploy",
+    "db:generate": "pnpm --filter @appointment/api db:generate",
+    "db:migrate": "pnpm --filter @appointment/api db:migrate",
+    "db:seed": "pnpm --filter @appointment/api db:seed",
+    "db:studio": "pnpm --filter @appointment/api db:studio",
+    "docker:down": "docker compose down --remove-orphans",
+    "docker:up": "docker compose up --build",
     "format": "prettier . --write",
-    "lint": "prettier . --check",
-    "test": "echo \"No tests configured yet\""
+    "format:check": "prettier . --check",
+    "lint": "pnpm -r lint",
+    "test": "pnpm -r test",
+    "typecheck": "pnpm -r typecheck"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "appointments",
+    "react",
+    "fastify",
+    "prisma",
+    "postgresql"
+  ],
+  "license": "MIT",
   "devDependencies": {
     "prettier": "3.8.0"
   },
