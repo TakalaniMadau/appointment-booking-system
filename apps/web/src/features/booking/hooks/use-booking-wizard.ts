@@ -1,26 +1,32 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { format, parseISO, startOfMonth } from "date-fns";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import type { CreateBookingRequest } from "@appointment/shared";
+import { parseISO, startOfMonth } from "date-fns";
 import { useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 
+import { createBooking, getBranchAvailability } from "../../../api/branches";
+import { ApiError } from "../../../api/client";
 import {
   bookingDetailsSchema,
 } from "../schemas/booking-details-schema";
 import type {
+  AvailabilityMonth,
   BookingDetailsValues,
   BranchLocation,
   ConfirmedBooking,
 } from "../types";
 import {
-  buildCalendarDays,
   buildTimeSlots,
-  getAvailableMonths,
+  getMonthKey,
+  isDateInAvailabilityMonth,
 } from "../utils/availability";
 import {
   createCalendarInvite,
-  createConfirmationCode,
 } from "../utils/booking-confirmation";
-import { getDefaultVisibleMonth } from "../utils/booking-wizard-constants";
+import {
+  getDefaultVisibleMonth,
+} from "../utils/booking-wizard-constants";
 
 type UseBookingWizardProps = {
   branches: BranchLocation[];
@@ -31,17 +37,20 @@ const scrollToTop = () => {
 };
 
 export const useBookingWizard = ({ branches }: UseBookingWizardProps) => {
+  const [dateTimeError, setDateTimeError] = useState<string | null>(null);
   const [currentStep, setCurrentStep] = useState(0);
-  const [selectedBranchSlug, setSelectedBranchSlug] = useState<string | null>(
+  const [selectedBranchId, setSelectedBranchId] = useState<string | null>(
     null,
   );
   const [selectedDate, setSelectedDate] = useState("");
-  const [selectedTime, setSelectedTime] = useState("");
+  const [selectedSlotId, setSelectedSlotId] = useState("");
+  const [selectedTimeLabel, setSelectedTimeLabel] = useState("");
   const [draftDate, setDraftDate] = useState("");
-  const [draftTime, setDraftTime] = useState("");
+  const [draftSlotId, setDraftSlotId] = useState("");
   const [visibleMonth, setVisibleMonth] = useState(startOfMonth(new Date()));
   const [confirmedBooking, setConfirmedBooking] =
     useState<ConfirmedBooking | null>(null);
+  const [submissionError, setSubmissionError] = useState<string | null>(null);
 
   const detailsForm = useForm<BookingDetailsValues>({
     defaultValues: {
@@ -58,103 +67,84 @@ export const useBookingWizard = ({ branches }: UseBookingWizardProps) => {
   });
 
   const selectedBranch =
-    branches.find((branch) => branch.slug === selectedBranchSlug) ??
-    branches[0] ??
-    null;
-  const availableMonths = selectedBranch
-    ? getAvailableMonths(selectedBranch)
-    : [];
-  const committedDate =
-    selectedBranch &&
-    selectedDate &&
-    buildTimeSlots(selectedBranch, selectedDate).length > 0
-      ? selectedDate
-      : "";
-  const committedTimeSlots =
-    selectedBranch && committedDate
-      ? buildTimeSlots(selectedBranch, committedDate)
-      : [];
-  const committedTime =
-    selectedTime && committedTimeSlots.includes(selectedTime)
-      ? selectedTime
-      : "";
-  const pickerDate =
-    selectedBranch &&
-    draftDate &&
-    buildTimeSlots(selectedBranch, draftDate).length > 0
-      ? draftDate
-      : committedDate;
-  const pickerTimeSlots =
-    selectedBranch && pickerDate
-      ? buildTimeSlots(selectedBranch, pickerDate)
-      : [];
+    branches.find((branch) => branch.id === selectedBranchId) ?? null;
+  const currentMonth = startOfMonth(new Date());
   const initialVisibleMonth = selectedBranch
     ? getDefaultVisibleMonth(selectedBranch)
-    : startOfMonth(new Date());
-  const activeMonth =
-    selectedBranch && !availableMonths.includes(format(visibleMonth, "yyyy-MM"))
-      ? initialVisibleMonth
-      : visibleMonth;
-  const calendarDays = selectedBranch
-    ? buildCalendarDays(selectedBranch, activeMonth)
-    : [];
-  const visibleMonthKey = format(activeMonth, "yyyy-MM");
-  const visibleMonthIndex = availableMonths.indexOf(visibleMonthKey);
-  const canMoveToPreviousMonth = visibleMonthIndex > 0;
-  const canMoveToNextMonth =
-    visibleMonthIndex > -1 && visibleMonthIndex < availableMonths.length - 1;
-  const canApplySchedule = Boolean(draftDate);
+    : currentMonth;
+  const visibleMonthKey = getMonthKey(visibleMonth);
+  const availabilityQuery = useQuery({
+    enabled: Boolean(selectedBranch),
+    queryFn: () => getBranchAvailability(selectedBranch!.id, visibleMonthKey),
+    queryKey: ["branch-availability", selectedBranch?.id, visibleMonthKey],
+  });
+  const availability: AvailabilityMonth | null = availabilityQuery.data ?? null;
+  const committedDate = selectedDate;
+  const committedTime = selectedTimeLabel;
+  const pickerDate = draftDate || committedDate;
+  const pickerTimeSlots =
+    pickerDate && isDateInAvailabilityMonth(availability, pickerDate)
+      ? buildTimeSlots(availability, pickerDate)
+      : [];
+  const draftSlot =
+    pickerTimeSlots.find((slot) => slot.id === draftSlotId) ?? null;
+  const canApplySchedule = Boolean(draftDate && draftSlot);
+  const createBookingMutation = useMutation({
+    mutationFn: createBooking,
+  });
+
+  const isSlotSelectionError = (error: unknown): error is ApiError =>
+    error instanceof ApiError &&
+    [
+      "slot_blocked",
+      "slot_expired",
+      "slot_not_found",
+      "slot_taken",
+      "slot_unavailable",
+    ].includes(error.code ?? "");
 
   const handleBranchSelection = (branch: BranchLocation) => {
-    setSelectedBranchSlug(branch.slug);
+    setDateTimeError(null);
+    setSelectedBranchId(branch.id);
     setVisibleMonth(getDefaultVisibleMonth(branch));
     setSelectedDate("");
-    setSelectedTime("");
+    setSelectedSlotId("");
+    setSelectedTimeLabel("");
     setDraftDate("");
-    setDraftTime("");
+    setDraftSlotId("");
+    setSubmissionError(null);
   };
 
   const handleDateSelection = (dateKey: string) => {
-    if (!selectedBranch) {
+    setDateTimeError(null);
+    setDraftDate(dateKey);
+    setDraftSlotId("");
+    if (!dateKey) {
       return;
     }
 
-    setDraftDate(dateKey);
-    setDraftTime("");
+    setVisibleMonth(startOfMonth(parseISO(dateKey)));
   };
 
   const handleDraftTimeChange = (value: string) => {
-    setDraftTime(value);
-  };
-
-  const handleMoveToPreviousMonth = () => {
-    if (!canMoveToPreviousMonth) {
-      return;
-    }
-
-    setVisibleMonth(parseISO(`${availableMonths[visibleMonthIndex - 1]}-01`));
-  };
-
-  const handleMoveToNextMonth = () => {
-    if (!canMoveToNextMonth) {
-      return;
-    }
-
-    setVisibleMonth(parseISO(`${availableMonths[visibleMonthIndex + 1]}-01`));
+    setDateTimeError(null);
+    setDraftSlotId(value);
   };
 
   const handleApplySchedule = () => {
-    if (!draftDate) {
+    if (!draftDate || !draftSlot) {
       return;
     }
 
+    setDateTimeError(null);
     setSelectedDate(draftDate);
-    setSelectedTime(draftTime);
+    setSelectedSlotId(draftSlot.id);
+    setSelectedTimeLabel(draftSlot.label);
   };
 
   const handleCancelSchedule = () => {
     setDraftDate(committedDate);
-    setDraftTime(committedTime);
+    setDraftSlotId(selectedSlotId);
     setVisibleMonth(
       committedDate
         ? startOfMonth(parseISO(committedDate))
@@ -167,16 +157,15 @@ export const useBookingWizard = ({ branches }: UseBookingWizardProps) => {
       return;
     }
 
+    setDateTimeError(null);
     if (!committedDate) {
       setVisibleMonth(getDefaultVisibleMonth(selectedBranch));
       setDraftDate("");
-      setDraftTime("");
+      setDraftSlotId("");
     } else {
       setDraftDate(committedDate);
-      setDraftTime(committedTime);
-      setVisibleMonth(
-        committedDate ? startOfMonth(parseISO(committedDate)) : activeMonth,
-      );
+      setDraftSlotId(selectedSlotId);
+      setVisibleMonth(startOfMonth(parseISO(committedDate)));
     }
 
     setCurrentStep(1);
@@ -184,15 +173,17 @@ export const useBookingWizard = ({ branches }: UseBookingWizardProps) => {
   };
 
   const handleBackToBranchSelection = () => {
+    setDateTimeError(null);
     setCurrentStep(0);
     scrollToTop();
   };
 
   const handleContinueToDetails = () => {
-    if (!selectedBranch || !committedDate || !committedTime) {
+    if (!selectedBranch || !committedDate || !committedTime || !selectedSlotId) {
       return;
     }
 
+    setDateTimeError(null);
     setCurrentStep(2);
     scrollToTop();
   };
@@ -202,21 +193,44 @@ export const useBookingWizard = ({ branches }: UseBookingWizardProps) => {
     scrollToTop();
   };
 
-  const handleConfirmAppointment = detailsForm.handleSubmit((values) => {
-    if (!selectedBranch || !committedDate || !committedTime) {
+  const handleConfirmAppointment = detailsForm.handleSubmit(async (values: BookingDetailsValues) => {
+    if (!selectedBranch || !committedDate || !committedTime || !selectedSlotId) {
       return;
     }
 
-    setConfirmedBooking({
-      bookedAt: new Date().toISOString(),
-      branch: selectedBranch,
-      confirmationCode: createConfirmationCode(),
-      details: values,
-      selectedDate: committedDate,
-      selectedTime: committedTime,
-    });
-    setCurrentStep(3);
-    scrollToTop();
+    setSubmissionError(null);
+
+    try {
+      const booking = await createBookingMutation.mutateAsync({
+        ...values,
+        purposeOfVisit:
+          values.purposeOfVisit as CreateBookingRequest["purposeOfVisit"],
+        slotId: selectedSlotId,
+      });
+
+      setConfirmedBooking(booking);
+      setCurrentStep(3);
+      scrollToTop();
+    } catch (error) {
+      if (isSlotSelectionError(error)) {
+        setSubmissionError(null);
+        setDateTimeError(error.message);
+        setDraftDate(committedDate);
+        setDraftSlotId("");
+        setSelectedSlotId("");
+        setSelectedTimeLabel("");
+        await availabilityQuery.refetch();
+        setCurrentStep(1);
+        scrollToTop();
+        return;
+      }
+
+      setSubmissionError(
+        error instanceof Error
+          ? error.message
+          : "We couldn't confirm the appointment. Please try again.",
+      );
+    }
   });
 
   const handleDownloadCalendar = () => {
@@ -244,24 +258,27 @@ export const useBookingWizard = ({ branches }: UseBookingWizardProps) => {
     detailsForm.reset();
     setConfirmedBooking(null);
     setDraftDate("");
-    setDraftTime("");
+    setDraftSlotId("");
+    setDateTimeError(null);
+    setSelectedDate("");
+    setSelectedSlotId("");
+    setSelectedTimeLabel("");
+    setSubmissionError(null);
     setCurrentStep(0);
     scrollToTop();
   };
 
   return {
-    activeMonth,
-    calendarDays,
+    availabilityQuery,
     canApplySchedule,
-    canMoveToNextMonth,
-    canMoveToPreviousMonth,
     committedDate,
     committedTime,
     confirmedBooking,
     currentStep,
+    dateTimeError,
     detailsForm,
     draftDate,
-    draftTime,
+    draftSlotId,
     handleApplySchedule,
     handleBackToBranchSelection,
     handleBackToDateTime,
@@ -274,15 +291,15 @@ export const useBookingWizard = ({ branches }: UseBookingWizardProps) => {
     handleDateSelection,
     handleDownloadCalendar,
     handleDraftTimeChange,
-    handleMoveToNextMonth,
-    handleMoveToPreviousMonth,
     handlePrintConfirmation,
+    isSubmitting: createBookingMutation.isPending,
     liveDetails,
     pickerDate,
     pickerTimeSlots,
     selectedBranch,
-    selectedBranchSlug,
+    selectedBranchId,
     selectedDate,
-    selectedTime,
+    selectedTime: committedTime,
+    submissionError,
   };
 };

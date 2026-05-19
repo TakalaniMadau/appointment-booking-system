@@ -122,15 +122,15 @@ export const BranchSelectionStep = ({
             </div>
           ) : showBranchesError ? (
             <div className="rounded-field border border-danger-500/20 bg-danger-100/40 px-4 py-3 text-sm text-danger-500">
-              We couldn't load branches from the Capitec feed right now.
+              We couldn't load branches right now.
             </div>
           ) : (
             <div className="grid max-h-[34rem] gap-4 overflow-auto pr-1">
               {branches.map((branch) => (
                 <BranchCard
                   branch={branch}
-                  isSelected={branch.slug === selectedBranchSlug}
-                  key={branch.slug}
+                  isSelected={branch.id === selectedBranchSlug}
+                  key={branch.id}
                   onSelect={() => onBranchSelect(branch)}
                 />
               ))}

@@ -60,7 +60,7 @@ export const BranchMap = ({
   }, []);
 
   const selectedBranch = useMemo(
-    () => branches.find((branch) => branch.slug === selectedBranchSlug) ?? null,
+    () => branches.find((branch) => branch.id === selectedBranchSlug) ?? null,
     [branches, selectedBranchSlug],
   );
 
@@ -74,7 +74,7 @@ export const BranchMap = ({
 
     const markers = branches.map((branch) => {
       const marker = L.marker([branch.latitude, branch.longitude], {
-        icon: buildMarkerIcon(branch.slug === selectedBranchSlug),
+        icon: buildMarkerIcon(branch.id === selectedBranchSlug),
       });
 
       marker.on("click", () => {

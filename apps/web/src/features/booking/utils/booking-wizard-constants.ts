@@ -1,7 +1,6 @@
 import { parseISO, startOfMonth } from "date-fns";
 
 import type { BranchLocation } from "../types";
-import { getFirstAvailableDate } from "./availability";
 
 export const stepDefinitions = [
   { key: "branch-selection", label: "Select Branch" },
@@ -19,7 +18,7 @@ export const appointmentReminders = [
 ] as const;
 
 export const getDefaultVisibleMonth = (branch: BranchLocation) => {
-  const firstAvailableDate = getFirstAvailableDate(branch);
+  const firstAvailableDate = branch.nextAvailableDate;
 
   if (!firstAvailableDate) {
     return startOfMonth(new Date());

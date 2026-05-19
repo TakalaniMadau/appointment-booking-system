@@ -6,7 +6,7 @@ import {
   CardHeader,
   CardTitle,
 } from "../../../components/ui/card";
-import type { BranchLocation } from "../types";
+import type { AvailabilityMonth, BranchLocation } from "../types";
 import { formatWindowSummary } from "../utils/availability";
 import {
   CalendarIcon,
@@ -17,12 +17,14 @@ import {
 import { SummaryTile } from "./summary-tile";
 
 type SelectionSummaryProps = {
+  availability: AvailabilityMonth | null;
   committedDate: string;
   committedTime: string;
   selectedBranch: BranchLocation;
 };
 
 export const SelectionSummary = ({
+  availability,
   committedDate,
   committedTime,
   selectedBranch,
@@ -51,7 +53,7 @@ export const SelectionSummary = ({
           icon={<ClockIcon className="h-5 w-5" />}
           label="Time"
           primary={committedTime}
-          secondary={formatWindowSummary(selectedBranch, committedDate) ?? ""}
+          secondary={formatWindowSummary(availability, committedDate) ?? ""}
         />
       ) : null}
 

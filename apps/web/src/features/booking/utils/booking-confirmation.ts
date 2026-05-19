@@ -1,12 +1,7 @@
 import { addMinutes, format, parse } from "date-fns";
+import { purposeOfVisitOptions } from "@appointment/shared";
 
-import { purposeOfVisitOptions } from "../schemas/booking-details-schema";
 import type { ConfirmedBooking } from "../types";
-
-export const createConfirmationCode = () =>
-  `CAP-${Math.random().toString(36).slice(2, 6).toUpperCase()}${Date.now()
-    .toString()
-    .slice(-4)}`;
 
 export const getPurposeLabel = (value: string) =>
   purposeOfVisitOptions.find((option) => option.value === value)?.label ??

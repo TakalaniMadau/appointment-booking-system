@@ -21,10 +21,7 @@ export const BranchCard = ({
   isSelected,
   onSelect,
 }: BranchCardProps) => {
-  const availableToday = branch.specialOperatingHours.some(
-    (window) =>
-      window.date === format(new Date(), "yyyy-MM-dd") && !window.closed,
-  );
+  const availableToday = branch.nextAvailableDate === format(new Date(), "yyyy-MM-dd");
 
   return (
     <button
@@ -67,7 +64,7 @@ export const BranchCard = ({
         </span>
         <span className="inline-flex items-center gap-2">
           <DistanceIcon className="h-4 w-4 text-brand-blue-600" />
-          {branch.distanceKm} km away
+          {branch.distanceKm !== null ? `${branch.distanceKm} km away` : "Distance unavailable"}
         </span>
       </div>
 
@@ -84,19 +81,21 @@ export const BranchCard = ({
               availableToday ? "bg-success-500" : "bg-slate-300",
             )}
           />
-          {availableToday ? "Available today" : branch.tradingStatus}
+          {availableToday
+            ? "Available today"
+            : branch.nextAvailableDate
+              ? `Next slot on ${branch.nextAvailableDate}`
+              : "No upcoming availability"}
         </span>
 
-        {branch.directionsUrl ? (
-          <a
-            className="text-sm font-semibold text-brand-blue-600 transition-colors hover:text-brand-blue-700"
-            href={branch.directionsUrl}
-            rel="noreferrer"
-            target="_blank"
-          >
-            Directions
-          </a>
-        ) : null}
+        <a
+          className="text-sm font-semibold text-brand-blue-600 transition-colors hover:text-brand-blue-700"
+          href={branch.directionsUrl}
+          rel="noreferrer"
+          target="_blank"
+        >
+          Directions
+        </a>
       </div>
     </button>
   );

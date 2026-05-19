@@ -61,7 +61,7 @@ export const BookingWizard = () => {
           mapFrameRef={mapFrameRef}
           resultsLabel={`Showing branches near ${activeCoordinates.label}.`}
           searchValue={searchValue}
-          selectedBranchSlug={wizard.selectedBranch?.slug ?? null}
+          selectedBranchSlug={wizard.selectedBranch?.id ?? null}
           showBranchesError={Boolean(branchesQuery.error)}
           onBranchSelect={wizard.handleBranchSelection}
           onContinue={wizard.handleContinueToSchedule}
@@ -73,33 +73,34 @@ export const BookingWizard = () => {
 
       {wizard.currentStep === 1 && wizard.selectedBranch ? (
         <DateTimeStep
-          activeMonth={wizard.activeMonth}
-          calendarDays={wizard.calendarDays}
+          availability={wizard.availabilityQuery.data ?? null}
           canApplySchedule={wizard.canApplySchedule}
-          canMoveToNextMonth={wizard.canMoveToNextMonth}
-          canMoveToPreviousMonth={wizard.canMoveToPreviousMonth}
           committedDate={wizard.committedDate}
           committedTime={wizard.committedTime}
-          draftTime={wizard.draftTime}
+          draftSlotId={wizard.draftSlotId}
+          dateTimeError={wizard.dateTimeError}
+          isAvailabilityLoading={wizard.availabilityQuery.isLoading}
+          isAvailabilityRefreshing={wizard.availabilityQuery.isFetching}
           pickerDate={wizard.pickerDate}
           pickerTimeSlots={wizard.pickerTimeSlots}
           selectedBranch={wizard.selectedBranch}
+          showAvailabilityError={Boolean(wizard.availabilityQuery.error)}
           onApply={wizard.handleApplySchedule}
           onBack={wizard.handleBackToBranchSelection}
           onCancel={wizard.handleCancelSchedule}
           onContinue={wizard.handleContinueToDetails}
           onDateSelect={wizard.handleDateSelection}
           onDraftTimeChange={wizard.handleDraftTimeChange}
-          onNextMonth={wizard.handleMoveToNextMonth}
-          onPreviousMonth={wizard.handleMoveToPreviousMonth}
         />
       ) : null}
 
       {wizard.currentStep === 2 && wizard.selectedBranch ? (
         <DetailsStep
           detailsForm={wizard.detailsForm}
+          isSubmitting={wizard.isSubmitting}
           onBack={wizard.handleBackToDateTime}
           onSubmit={wizard.handleConfirmAppointment}
+          submissionError={wizard.submissionError}
         />
       ) : null}
 

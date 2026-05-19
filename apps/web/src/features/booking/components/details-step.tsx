@@ -17,8 +17,10 @@ import { ArrowLeftIcon, ArrowRightIcon } from "./icons";
 
 type DetailsStepProps = {
   detailsForm: UseFormReturn<BookingDetailsValues>;
+  isSubmitting: boolean;
   onBack: () => void;
   onSubmit: FormEventHandler<HTMLFormElement>;
+  submissionError: string | null;
 };
 
 const FieldError = ({ message }: { message: string | undefined }) =>
@@ -26,8 +28,10 @@ const FieldError = ({ message }: { message: string | undefined }) =>
 
 export const DetailsStep = ({
   detailsForm,
+  isSubmitting,
   onBack,
   onSubmit,
+  submissionError,
 }: DetailsStepProps) => (
   <>
     <Card>
@@ -134,6 +138,12 @@ export const DetailsStep = ({
               message={detailsForm.formState.errors.additionalNotes?.message}
             />
           </div>
+
+          {submissionError ? (
+            <div className="rounded-field border border-danger-500/20 bg-danger-100/40 px-4 py-3 text-sm text-danger-500">
+              {submissionError}
+            </div>
+          ) : null}
         </form>
       </CardContent>
     </Card>
@@ -143,8 +153,13 @@ export const DetailsStep = ({
         <ArrowLeftIcon className="h-4 w-4" />
         Back
       </Button>
-      <Button form="booking-details-form" size="lg" type="submit">
-        Review Appointment
+      <Button
+        disabled={isSubmitting}
+        form="booking-details-form"
+        size="lg"
+        type="submit"
+      >
+        {isSubmitting ? "Confirming Appointment..." : "Review Appointment"}
         <ArrowRightIcon className="h-4 w-4" />
       </Button>
     </div>

@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { startTransition, useDeferredValue, useState } from "react";
 
-import { geocodeSearchLocation, searchCapitecBranches } from "../../../api/capitec";
+import { geocodeSearchLocation, getBranches } from "../../../api/branches";
 import type { SearchCoordinates } from "../types";
 
 const defaultCoordinates: SearchCoordinates = {
@@ -44,9 +44,9 @@ export const useBranchSearch = () => {
       : deviceError;
 
   const branchesQuery = useQuery({
-    queryFn: () => searchCapitecBranches(activeCoordinates),
+    queryFn: () => getBranches(activeCoordinates),
     queryKey: [
-      "capitec-branches",
+      "branches",
       activeCoordinates.latitude,
       activeCoordinates.longitude,
     ],
