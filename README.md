@@ -33,95 +33,119 @@ Full-stack appointment booking system built as a `pnpm` workspace with:
 └── pnpm-workspace.yaml
 ```
 
-## Prerequisites
+## Quick Start
+
+Choose one path:
+
+- Use Docker if you want the fastest first run.
+- Use local development if you want the best day-to-day editing workflow.
+
+## Fastest First Run
+
+This path only needs Docker Desktop.
+
+1. Start the full stack:
+
+```bash
+docker compose up --build -d
+```
+
+2. Seed demo branches and slots:
+
+```bash
+docker compose exec -T api node --import tsx apps/api/prisma/seed.ts
+```
+
+3. Open the app:
+
+- Web: [http://localhost:8080](http://localhost:8080)
+- API health: [http://localhost:4000/api/health](http://localhost:4000/api/health)
+
+If the app shows no branches, run the seed command again. The demo data lives in the database volume used by Docker.
+
+## Local Development
+
+Use this path if you want to work on the code locally.
+
+### Prerequisites
 
 - Node `24.15.0`
 - `pnpm` via Corepack
-- Docker Desktop
+- Docker Desktop for PostgreSQL
 
-If you use `mise`, this repo now pins Node in `.mise.toml`:
+Use any Node manager you like:
+
+```bash
+nvm install 24.15.0
+nvm use 24.15.0
+```
+
+If you use `mise`, this repo also includes `.mise.toml`:
 
 ```bash
 mise install
 mise use -p node@24.15.0
 ```
 
-Enable `pnpm` if needed:
+Enable `pnpm`:
 
 ```bash
 corepack enable
 corepack prepare pnpm@11.1.2 --activate
 ```
 
-If you previously installed dependencies under a different Node version, reinstall them after switching so Vite and Tailwind native packages are rebuilt consistently.
+### Setup
 
-## Install
-
-1. Install dependencies:
-
-```bash
-CI=true pnpm install --no-frozen-lockfile
-pnpm approve-builds --all
-```
-
-2. Copy environment variables if you want a clean local file:
+1. Create a local environment file:
 
 ```bash
 cp .env.example .env
 ```
 
-3. Generate Prisma client:
+2. Install dependencies:
 
 ```bash
-pnpm db:generate
+CI=true pnpm install --no-frozen-lockfile
 ```
 
-## Run With Docker
-
-This is the fastest way to start everything:
-
-```bash
-docker compose up --build
-```
-
-Services:
-
-- Web: [http://localhost:8080](http://localhost:8080)
-- API: [http://localhost:4000/api/health](http://localhost:4000/api/health)
-- PostgreSQL: `localhost:5432`
-
-## Run Locally
-
-1. Start PostgreSQL. The easiest option is to run only the database from Compose:
+3. Start only the database:
 
 ```bash
 docker compose up -d db
 ```
 
-2. Apply the migration and seed demo data:
+4. Generate Prisma client, apply the migration, and seed demo data:
 
 ```bash
-pnpm --filter @appointment/api exec prisma migrate deploy
+pnpm db:generate
+pnpm db:deploy
 pnpm db:seed
 ```
 
-3. Start both apps:
+5. Start the API and web app:
 
 ```bash
 pnpm dev
 ```
 
-Or run them separately:
+Open:
+
+- Web: [http://localhost:5173](http://localhost:5173)
+- API health: [http://localhost:4000/api/health](http://localhost:4000/api/health)
+
+If you prefer to run the apps separately:
 
 ```bash
 pnpm dev:api
 pnpm dev:web
 ```
 
-Local endpoints:
+## Helpful Notes
 
-- Web: [http://localhost:5173](http://localhost:5173)
-- API: [http://localhost:4000/api/health](http://localhost:4000/api/health)
+- You do not need `mise` to run this project.
+- Docker is the quickest way to get started after a fresh clone.
+- The UI will look empty until the database has been seeded.
+- If you switch Node versions after installing dependencies, reinstall them so native packages like Vite and Tailwind line up with your active Node version.
 
 ## Scripts
 
