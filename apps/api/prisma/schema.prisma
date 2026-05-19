@@ -1,0 +1,127 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum AppointmentSlotStatus {
+  AVAILABLE
+  BOOKED
+  BLOCKED
+}
+
+enum BookingStatus {
+  CONFIRMED
+  CANCELLED
+}
+
+enum EmailDeliveryStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
+model Branch {
+  id             String               @id @default(cuid())
+  slug           String               @unique
+  name           String
+  timezone       String               @default("Africa/Johannesburg")
+  streetAddress  String
+  city           String
+  province       String
+  postalCode     String
+  latitude       Float
+  longitude      Float
+  phone          String
+  isActive       Boolean              @default(true)
+  businessHours  BranchBusinessHour[]
+  closures       BranchClosure[]
+  slots          AppointmentSlot[]
+  bookings       Booking[]
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+}
+
+model BranchBusinessHour {
+  id                  String  @id @default(cuid())
+  branchId            String
+  dayOfWeek           Int
+  opensAt             String
+  closesAt            String
+  slotDurationMinutes Int     @default(30)
+  isClosed            Boolean @default(false)
+  branch              Branch  @relation(fields: [branchId], references: [id], onDelete: Cascade)
+
+  @@unique([branchId, dayOfWeek])
+}
+
+model BranchClosure {
+  id        String   @id @default(cuid())
+  branchId  String
+  startsAt  DateTime
+  endsAt    DateTime
+  reason    String
+  branch    Branch   @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AppointmentSlot {
+  id        String                @id @default(cuid())
+  branchId  String
+  startsAt  DateTime
+  endsAt    DateTime
+  status    AppointmentSlotStatus @default(AVAILABLE)
+  branch    Branch                @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  booking   Booking?
+  createdAt DateTime              @default(now())
+  updatedAt DateTime              @updatedAt
+
+  @@unique([branchId, startsAt])
+  @@index([branchId, startsAt])
+}
+
+model Customer {
+  id        String    @id @default(cuid())
+  fullName  String
+  email     String    @unique
+  phone     String
+  bookings  Booking[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Booking {
+  id               String        @id @default(cuid())
+  slotId           String        @unique
+  branchId         String
+  customerId       String
+  confirmationCode String        @unique
+  status           BookingStatus @default(CONFIRMED)
+  purposeOfVisit   String
+  additionalNotes  String?
+  slot             AppointmentSlot @relation(fields: [slotId], references: [id], onDelete: Restrict)
+  branch           Branch          @relation(fields: [branchId], references: [id], onDelete: Restrict)
+  customer         Customer        @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  emailOutbox      EmailOutbox[]
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+}
+
+model EmailOutbox {
+  id          String              @id @default(cuid())
+  bookingId   String
+  toEmail     String
+  subject     String
+  payloadJson Json
+  status      EmailDeliveryStatus @default(PENDING)
+  sentAt      DateTime?
+  booking     Booking             @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  @@index([bookingId, status])
+}
