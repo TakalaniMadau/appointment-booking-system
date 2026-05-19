@@ -38,7 +38,6 @@ Full-stack appointment booking system built as a `pnpm` workspace with:
 - Node `24.15.0`
 - `pnpm` via Corepack
 - Docker Desktop
-- Context7 already installed and configured
 
 If you use `mise`, this repo now pins Node in `.mise.toml`:
 
