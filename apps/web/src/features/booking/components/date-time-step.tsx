@@ -15,10 +15,7 @@ import type {
   TimeSlotOption,
 } from "../types";
 import { SelectionSummary } from "./selection-summary";
-import {
-  ArrowLeftIcon,
-  ArrowRightIcon,
-} from "./icons";
+import { ArrowLeftIcon, ArrowRightIcon } from "./icons";
 
 type DateTimeStepProps = {
   availability: AvailabilityMonth | null;
@@ -90,7 +87,7 @@ export const DateTimeStep = ({
                   Select appointment date
                 </label>
                 <Input
-                  className="[color-scheme:light]"
+                  className=""
                   id="appointment-date"
                   min={minimumDate}
                   onChange={(event) => onDateSelect(event.target.value)}
